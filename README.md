@@ -161,7 +161,7 @@ Although UDP isn’t ideal for sending an email, viewing a webpage, or downloadi
 
 ![DCP-vs-TCP](img/udp-vs-tcp.png)
 
-[REFERENCE](https://www.lifesize.com/en/blog/tcp-vs-udp/)
+[Reference](https://www.lifesize.com/en/blog/tcp-vs-udp/)
 
 ### Understand how DNS works.
 
@@ -170,10 +170,32 @@ Although UDP isn’t ideal for sending an email, viewing a webpage, or downloadi
 
 ### HTTP 
 
+HTTP (Hyper Text Transfer Protocol) is application layer protocol that is sent over TCP which allows web based 
+applications to communicate andexchange data. HTTP  is a connectionless and stateless protocol in which any sort of data 
+can be transfer if both computers can understand. HTTP is a client-server protocol: requests are sent by the client to the s
+erver which handles it and then provides a response.
+
+[Further Reading](https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview) 
+
+#### HTTP Flow 
+
+1. Open a TCP connection: The TCP connection is used to send a request, The client may open a new connection, reuse an existing connection, or open several TCP connections to the servers.
+2. Send an HTTP message
+3. Read the response sent by the server
+4. Close or reuse the connection for further requests.
+
+
+#### HTTP 1.0 vs HTTP 1.1 vs HTTP 2.0
+
+![HTTP Comparision](img/http-comparision.png)
+
+[Reference](https://cheapsslsecurity.com/p/http2-vs-http1/)
+
+
 ### WebSockets
 
 
-### Rest SPI  
+### Rest API  
 
 https://igotanoffer.com/blogs/tech/network-protocols-proxies-system-design-interview
 https://www.section.io/engineering-education/networking-models-introductory-guide/
