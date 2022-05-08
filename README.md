@@ -142,9 +142,12 @@ Application Layer: application-enabling functionality. e.g. HTTP
 
 What is TCP?
 
-Transmission Control Protocol (TCP) is connection-oriented, meaning once a connection has been established, data can be transmitted in two directions. TCP has built-in systems to check for errors and to guarantee data will be delivered in the order it was sent, making it the perfect protocol for transferring information like still images, data files, and web pages.
-But while TCP is instinctively reliable, its feedback mechanisms also result in a larger overhead, translating to greater use of the available bandwidth on your network. 
+Transmission Control Protocol (TCP) is a protocol that is design to send data across the internet by making sure successful delivery of data and messages over networks.  
 
+TCP organizes data so that it can be transmitted between a server and a client. Initially, TCP creates a connection between source and destination using three-way handshake. 
+Then source computer start sending packets to the destination computer. The destination computer will have to send an acknowledgement of each packet it received. 
+TCP protocol provide ability for detecting out of order and lost packets. 
+   
 [more details](https://www.khanacademy.org/computing/computers-and-internet/xcae6f4a7ff015e7d:the-internet/xcae6f4a7ff015e7d:transporting-packets/a/transmission-control-protocol--tcp) 
 
 What is UDP?
