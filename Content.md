@@ -8,7 +8,7 @@
 7. Batch Processing 
 8. Stream Processing   
 9. Load Balancer
-10.Networking 
+10. Networking 
 11. Caching 
 14. Exploring Databases   
 
