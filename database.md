@@ -302,7 +302,6 @@ SLOW Index Reasons
 
 
 
-
 Query Optimization Best Practice
 1. Negative Clause Are Not as Good As Positive Clause
 2. Use UNION ALL Instead of UNION
