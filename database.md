@@ -1,49 +1,104 @@
 # Database
 
 ## Summary
-In this particular section, I'm going to cover different database concepts that most software engineers should know in order to design efficient and scalable systems. 
+In this particular section, I'm going to cover different database concepts that most software engineers should know in 
+order to design efficient and scalable systems. 
 
 
 # ACID Properties
 
-In order to maintain consistency before/after transaction database follows certain properties. These are called ACID properties.
+In order to maintain consistency before/after transaction database follows certain properties. These are called ACID 
+properties.
 
-_**Atomicity:**_  The whole transaction happens at once or not at all. If one part of the transaction fails, the entire transaction need to fails and database state is left unchanged. If the whole transaction completes then the changes are visible. 
+_**Atomicity:**_  The whole transaction happens at once or not at all. If one part of the transaction fails, the entire 
+transaction need to fails and database state is left unchanged. If the whole transaction completes then the changes are 
+visible. 
 
-_**Consistency:**_  The database should be in consistent state before and after the transaction i.e only valid data is written to the database. Consistency enforces integrity constraints to maintain the accuracy and correctness of data.
+_**Consistency:**_  The database should be in consistent state before and after the transaction i.e only valid data is
+written to the database. Consistency enforces integrity constraints to maintain the accuracy and correctness of data.
 
-_**Isolation:**_  The intermediate state of the transaction should not be visible to other transactions. Changes occurring in a particular transaction will not be visible to any other transaction until that particular change in that transaction is written to memory or has been committed. This property ensures that the execution of transactions concurrently will result in a state that is equivalent to a state achieved these were executed serially in some order.
+_**Isolation:**_  The intermediate state of the transaction should not be visible to other transactions. Changes 
+occurring in a particular transaction will not be visible to any other transaction until that particular change in that
+transaction is written to memory or has been committed. This property ensures that the execution of transactions 
+concurrently will result in a state that is equivalent to a state achieved these were executed serially in some order.
 
-_**Durability:**_ Once the transaction is complete, the changes made to the database should be permanent and should not be lost even if the system fails. 
+_**Durability:**_ Once the transaction is complete, the changes made to the database should be permanent and should not 
+be lost even if the system fails. 
 
 
 # Transactional Isolation Problem  
 
-Isolation levels define the degree to which a transaction must be isolated from the data modifications made by any other transaction in the database system. A transaction isolation level is defined by the following phenomena:
+Isolation levels define the degree to which a transaction must be isolated from the data modifications made by any other
+transaction in the database system. A transaction isolation level is defined by the following phenomena:
 
-_**Dirty Read**_ – A Dirty read is a situation when a transaction reads data that has not yet been committed. For example, Let’s say transaction 1 updates a row and leaves it uncommitted, meanwhile, Transaction 2 reads the updated row. If transaction 1 rolls back the change, transaction 2 will have read data that is considered never to have existed.
+_**Dirty Read**_ – A Dirty read is a situation when a transaction reads data that has not yet been committed. 
+For example, Let’s say transaction 1 updates a row and leaves it uncommitted, meanwhile, Transaction 2 reads the updated 
+row. If transaction 1 rolls back the change, transaction 2 will have read data that is considered never to have existed.
 
-_**Non Repeatable Read**_ – Non Repeatable read occurs when a transaction reads the same rows twice and gets a different value each time. For example, suppose transaction T1 reads data. Due to concurrency, another transaction T2 updates the same data and commit, Now if transaction T1 rereads the same data, it will retrieve a different value.
+_**Non Repeatable Read**_ – Non Repeatable read occurs when a transaction reads the same rows twice and gets a different 
+value each time. For example, suppose transaction T1 reads data. Due to concurrency, another transaction T2 updates the 
+same data and commit, Now if transaction T1 rereads the same data, it will retrieve a different value. e.g Transaction 
+A reads the account balance, Transaction B deposits money, and then Transaction A reads the balance again, 
+finding it changed.
 
-_**Phantom Read**_ – A transaction re-executes a query returning a set of rows that satisfy a search condition and finds that the set of rows satisfying the condition has changed due to another recently-committed transaction.For example, suppose transaction T1 retrieves a set of rows that satisfy some search criteria. Now, Transaction T2 generates some new rows that match the search criteria for transaction T1. If transaction T1 re-executes the statement that reads the rows, it gets a different set of rows this time.
+_**Phantom Read**_ – A transaction re-executes a query returning a set of rows that satisfy a search condition and finds 
+that the set of rows satisfying the condition has changed due to another recently-committed transaction.For example, 
+suppose transaction T1 retrieves a set of rows that satisfy some search criteria. Now, Transaction T2 generates some new 
+rows that match the search criteria for transaction T1. If transaction T1 re-executes the statement that reads the rows, 
+it gets a different set of rows this time. e.g Transaction A counts the number of accounts with a balance above a certain 
+threshold. Transaction B creates a new account that meets the criteria, causing Transaction A to get a different count 
+if it reads again.
 
-# Locking In MYSQL DB
+_**Lost Updates**_: When two transactions concurrently update the same data, one transaction's update might overwrite the 
+other's, leading to data loss. e.g Transaction A and Transaction B both withdraw from the same account simultaneously, 
+each reading the balance and then updating it. One update might overwrite the other, leading to incorrect balances.
 
-#### Shared and Exclusive Locks
+
+# Transactional Isolation Level
+
+_**Read Uncommitted**_ – Read Uncommitted is the lowest isolation level. In this level, one transaction will read latest 
+version of a row that is modified by any transaction, thereby allowing dirty reads. At this level, transactions are 
+not isolated from each other.
+
+_**Read Committed**_ – This isolation level guarantees that any data read is committed at the moment it is read.
+In innodb the "Read Committed" isolation level, each consistent read, even within the same transaction, sets and reads 
+its own fresh snapshot. It acquires a shared lock on Read statement and exclusive lock when we update a 
+field.
+
+
+_**Repeatable Read**_ – The "Repeatable Read" isolation level ensures that if a transaction reads a row, subsequent reads of 
+that same row within the same transaction will return the same data, even if other transactions modify the data in the 
+meantime. This level prevents non-repeatable reads and dirty reads but allows for phantom reads. Innodb uses Multiversion 
+Concurrency Control (MVCC) to manage concurrent transactions. A consistent snapshot of the database is created at the 
+start of each transaction and this snapshot is used for all reads within the transaction. It acquires a shared lock on Read 
+statement and exclusive lock when we update a field. 
+
+_**Serializable**_
+
+It ensures complete isolation from other transactions, making concurrent transactions behave as if they were executed 
+one after another, in sequence. In innodb it will apply share lock creates a shared lock on all select statements
+whether you use for share or not. Due to the excessive locks used, there is a greater risk of deadlocks occurring.
+
+
+
+# Locking In MYSQL DB 
+
+### Shared and Exclusive Locks
 ---
 
-A _**Shared Lock:**_ is a kind of lock that allows other transactions to read the locked object, and to also acquire other shared locks on it, but not to write to it. 
+A _**Shared Lock:**_ is a kind of lock that allows other transactions to read the locked object, and to also acquire 
+other shared locks on it, but not to write to it. 
 
-A _**Exclusive Lock:**_  is a kind of lock that permits the transaction that holds the lock to update or delete a row. It doesn't allow other transaction to hold any lock.
+A _**Exclusive Lock:**_  is a kind of lock that permits the transaction that holds the lock to update or delete a row. 
+It doesn't allow other transaction to hold any lock.
 
 
 > If transaction T1 holds a shared (S) lock on row r A request by T2 for an S lock can be granted  but request by T2 for an X lock cannot be granted immediately T2 has to wait for transaction T1 to release its lock on row r.
 
 > If a transaction T1 holds an exclusive (X) lock on row r, a request from some distinct transaction T2 for a lock of either type on r cannot be granted immediately.T2 has to wait for transaction T1 to release its lock on row r.
  
- <br>
-
-#### Intention Locks
+ 
+Intention Locks
 ---
 To make locking at multiple granularity levels practical, InnoDB uses intention locks.
 
@@ -64,41 +119,117 @@ Table-level lock type compatibility is summarized in the following matrix.
 |S	|Conflict	|Conflict	|Compatible	|Compatible|
 |IS	|Conflict	|Compatible	|Compatible	|Compatible|
 
-A lock is granted to a requesting transaction if it is compatible with existing locks, but not if it conflicts with existing locks. A transaction waits until the conflicting existing lock is released. If a lock request conflicts with an existing lock and cannot be granted because it would cause deadlock, an error occurs.
+A lock is granted to a requesting transaction if it is compatible with existing locks, but not if it conflicts with 
+existing locks. A transaction waits until the conflicting existing lock is released. If a lock request conflicts with an
+existing lock and cannot be granted because it would cause deadlock, an error occurs.
 
-Intention locks do not block anything except full table requests (for example, LOCK TABLES ... WRITE). The main purpose of intention locks is to show that someone is locking a row, or going to lock a row in the table.
+Intention locks do not block anything except full table requests (for example, LOCK TABLES ... WRITE). The main purpose
+of intention locks is to show that someone is locking a row, or going to lock a row in the table.
 
+### Record Locks
 
+Record locks are used to lock individual rows in a table. They prevent other transactions from modifying or reading the 
+locked rows until the lock is released. Record locks always lock index records, even if a table is defined with no 
+indexes. For such cases, InnoDB creates a hidden clustered index and uses this index for record locking.
 
-# Transactional Isolation Level 
+### Gap Locks 
 
-_**Read Uncommitted**_ – Read Uncommitted is the lowest isolation level. In this level, one transaction will read latest version of a row thats been modified by any transaction, thereby allowing dirty reads. At this level, transactions are not isolated from each other.
+Gap locks are used to lock gaps between index entries, rather than the entries themselves. They prevent other 
+transactions from inserting new rows into the gap between existing index entries.Gap locks in InnoDB are use to is to 
+prevent other transactions from inserting to the gap.
 
-_**Read Committed**_ – This isolation level guarantees that any data read is committed at the moment it is read. Thus it does not allow dirty read. The transaction holds a read or write lock on the current row, and thus prevents other transactions from reading, updating, or deleting it.
+Example:
+Transaction A locks the gap between the values 10 and 20 in an index.
+Transaction B cannot insert a new row with a value between 10 and 20 until Transaction A releases the lock.
 
-_**Repeatable Read**_ – This is the most restrictive isolation level. The transaction holds read locks on all rows it references and writes locks on referenced rows for update and delete actions. Since other transactions cannot read, update or delete these rows, consequently it avoids non-repeatable read.
+### Next Key Locks
 
-_**Serializable**_ – This is the highest isolation level. A serializable execution is guaranteed to be serializable. Serializable execution is defined to be an execution of operations in which concurrently executing transactions appears to be serially executing.
+Next-key locking is a technique that combines row-level locking (index-record locks) with gap locking. When InnoDB
+scans or searches a table index, it sets locks not only on the individual index records but also on the gaps between 
+these records. This ensures that no other transactions can insert, update, or delete rows within the locked range.
 
+Example:
+
+Consider a table employees with an index on the salary column. Assume the index has the following entries: 30,000, 40,000, 50,000.
+
+Transaction A performs a query: SELECT * FROM employees WHERE salary BETWEEN 35000 AND 45000 FOR UPDATE.
+
+This query would lock the index records for 40,000 and the gap before it (35,000 to 40,000).
+The lock on the gap ensures that no new records with a salary in the range 35,000 to 40,000 can be inserted by other 
+transactions. Transaction B tries to insert a new row with a salary of 37,000.
+
+Since Transaction A holds a next-key lock on the gap before 40,000, Transaction B is blocked from inserting the new row 
+until Transaction A releases the lock.
+
+### AUTO-INC Locks ** Need To add more details
+
+An AUTO-INC lock is a special table-level lock taken by transactions inserting into tables with AUTO_INCREMENT columns. 
+In the simplest case, if one transaction is inserting values into the table, any other transactions must wait to do their 
+own inserts into that table, so that rows inserted by the first transaction receive consecutive primary key values.
+
+The innodb_autoinc_lock_mode variable controls the algorithm used for auto-increment locking
 
 ##  Database Index Basic
 
 An index is a data structure that improves the speed of data retrieval operations on database tables. It acts like a
 pointer to the actual data, allowing the database management system to locate specific rows quickly without scanning the entire table.
-An index is created on one or more columns of a table, and it stores a sorted copy of the indexed column(s) along with a
-reference to the location of the corresponding rows in the table.
 
-Index Storage Structure
+### Structure Use to store index is B-Tree  
 
-Types OF Index
+A B-Tree is a self-balancing tree data structure that maintains sorted data and allows searches, sequential access, 
+insertions, and deletions in logarithmic time. The B+Tree, a variant of the B-Tree, is typically used in databases.
 
-Column Index: An index on a single column
-Compound Index: An index on multiple columns. If the table has a multiple-column index, any leftmost prefix of the index
-can be used by the optimizer to look up rows. For example, if you have a three-column index on (col1, col2, col3), you
+#### Key characteristics of a B+Tree:
+
+**Nodes:** Internal nodes and leaf nodes.
+**Internal** Nodes: Store keys and pointers to child nodes.
+**Leaf Nodes:** Store actual data values or pointers to the data (in the case of secondary indexes).
+
+_**Note:** Other structure are also used_ 
+
+### Clustered Index
+Determines the physical order of data in a table. The table data is stored in the leaf nodes of the index.
+**Characteristics:**
+ 1. Only one clustered index per table.
+ 2. Data rows are stored in the order of the index.
+ 3. Usually created on the primary key.
+ 4. Efficient for range queries and sorting operations.
+
+### Non-Clustered Index
+An index structure separate from the data rows. The leaf nodes contain pointers to the data rows.
+**Characteristics:**
+ 1. Multiple non-clustered indexes can be created on a table.
+ 2. Does not affect the physical order of data rows.
+ 3. Useful for columns frequently used in search queries and joins.
+ 4. Contains index entries and pointers to the actual data rows.
+
+### Types Of Index
+
+**1. Column Index:**   An index on a single column
+
+**2. Compound Index:** An index on multiple columns. If the table has a multiple-column index, any leftmost prefix of the 
+index can be used by the optimizer to look up rows. For example, if you have a three-column index on (col1, col2, col3), you
 have indexed search capabilities on (col1), (col1, col2), and (col1, col2, col3).
-Covering Index: A covering index is a regular index that provides all the data required for a query without having to access the actual table. When a query is executed, the database looks for the required data in the index tree, retrieves it, and returns the result.
-Partial Index: An index that contains a subset of the column in a table
-e.g the first 10 character of a person index
+
+**3. Covering Index:** A covering index is a regular index that provides all the data required for a query without having 
+to access the actual table. When a query is executed, the database looks for the required data in the index tree, 
+retrieves it, and returns the result.
+
+**4. Partial Index:** An index that contains a subset of the column in a table e.g the first 10 character of a person index
+
+#### Are Too Many Index Bad?
+
+1. It takes a lot of storage space and make the table slower for large database
+2. It makes update/add/delete slower because it have to update the index as well.
+
+
+
+#### Sow Index Reasons
+1. Low Cardinality
+2. Large Data Sets
+3. Multiple Column Index Traversal:
+4. Index Column Used As Function Argument: (In such case index will not be used becuase we have index on column not a function)
+5. Data Type Mismatch:
 
 # Database Query Optimization
 
@@ -274,6 +405,7 @@ for (each row in outer table matching where clause) {
 Rows: It's the critical performance indicator. Total Approximation is the product of all the row in the tables. 
 
 Bad Query indicators:
+
 1. No index is used - NULL in key column
 2. Large number of rows estimated
 3. Using temporary
@@ -285,31 +417,14 @@ Bad Query indicators:
 
 
 
-Are Too Many Index Bad?
-
-1. It takes a lot of storage space and make the table slower for large database
-2. It makes update/add/delete slower because it have to update the index as well.
-
-
-
-SLOW Index Reasons
-1. Low Cardinality 
-2. Large Data Sets 
-3. Multiple Column Index Traversal: 
-4. Index Column Used As Function Argument: (In such case index will not be used becuase we have index on column not a function)
-5. Data Type Mismatch:
-
-
-
-
-Query Optimization Best Practice
+#### Query Optimization Best Practice
 1. Negative Clause Are Not as Good As Positive Clause
 2. Use UNION ALL Instead of UNION
 3. Order By Can be expensive avoid when using small data
 4. Use Inner instead of Left Join 
 5. Do not use LIKE clause where the wildcards is the start in WHERE clause as it will not use index.  
 
-How To Find Slow Queries
+#### How To Find Slow Queries
 
 1. Slow Queries Logs
 2. Process List
